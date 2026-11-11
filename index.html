@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARSSI | Cybersécurité Offensive (OSCP/OSWE), Architecture, DevSecOps Cloud & RSSI Temps Partagé — Grenoble</title>
+  <meta name="description" content="ARSSI, cabinet indépendant basé à Grenoble : Tests d'intrusion (OSCP, OSWE), Revue d'Architecture Sécurité, DevSecOps Cloud (Azure & AWS), Défense certifiée Claude CVP et RSSI/CISO Assistant à temps partagé." />
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Space Grotesk (Headers/Tech), Inter (Body), JetBrains Mono (Telemetry/Code) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind Custom Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            arssi: {
+              dark: '#040D1A',
+              navy: '#0B3558',
+              navyLight: '#134B7A',
+              crimson: '#C8102E',
+              crimsonLight: '#E11D48',
+              slate: '#94A3B8',
+              surface: '#09192F'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Space Grotesk', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          boxShadow: {
+            'glow-blue': '0 0 30px -5px rgba(11, 53, 88, 0.7), 0 0 15px -3px rgba(56, 189, 248, 0.2)',
+            'glow-red': '0 0 30px -5px rgba(200, 16, 46, 0.5)',
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.45)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --arssi-navy: #0B3558;
+      --arssi-crimson: #C8102E;
+      --arssi-dark: #040D1A;
+    }
+
+    body {
+      background-color: #040D1A;
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+
+    /* Subtle cyber grid overlay */
+    .bg-cyber-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: linear-gradient(145deg, rgba(11, 53, 88, 0.24) 0%, rgba(7, 20, 38, 0.78) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .glass-card:hover {
+      border-color: rgba(200, 16, 46, 0.45);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 36px -10px rgba(4, 13, 26, 0.8), 0 0 25px -5px rgba(200, 16, 46, 0.2);
+    }
+
+    .glass-panel {
+      background: rgba(9, 25, 47, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    /* Shield floating animation */
+    @keyframes floatShield {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .animate-shield {
+      animation: floatShield 6s ease-in-out infinite;
+    }
+
+    /* Scanline subtle effect on console */
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(500%); }
+    }
+
+    .scanline-bar {
+      height: 40px;
+      background: linear-gradient(to bottom, transparent, rgba(200, 16, 46, 0.08), rgba(56, 189, 248, 0.12), transparent);
+      animation: scanline 7s linear infinite;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040D1A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #0B3558;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C8102E;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-arssi-crimson selection:text-white bg-cyber-grid">
+
+  <!-- =====================================================================
+       REUSABLE SVG DEFINITIONS (ARSSI SHIELD & EAGLE GRADIENT)
+       Vector recreation of the uploaded logo96x96.png:
+       - Deep Navy (#0B3558) outer shield border
+       - Crisp White (#FFFFFF) inner frame & center divider
+       - Left panel: Crimson Red (#C8102E) | Right panel: Deep Navy (#0B3558)
+       - Eagle in flight: Smooth diagonal gradient from Navy (#0B3558)
+         on the left wing/head to Crimson Red (#C8102E) on the right wing/tail.
+  ====================================================================== -->
+  <svg width="0" height="0" class="hidden" aria-hidden="true">
+    <defs>
+      <linearGradient id="arssiEagleGrad" x1="16%" y1="35%" x2="84%" y2="65%">
+        <stop offset="0%" stop-color="#072846" />
+        <stop offset="38%" stop-color="#0B3558" />
+        <stop offset="52%" stop-color="#692343" />
+        <stop offset="68%" stop-color="#B8122E" />
+        <stop offset="100%" stop-color="#D41232" />
+      </linearGradient>
+
+      <linearGradient id="shieldBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#0F4370" />
+        <stop offset="50%" stop-color="#0B3558" />
+        <stop offset="100%" stop-color="#07223B" />
+      </linearGradient>
+
+      <!-- Master ARSSI Shield Symbol -->
+      <symbol id="arssi-shield-mark" viewBox="0 0 200 220">
+        <!-- Outer Navy Shield -->
+        <path d="M18 12 H182 V146 L100 208 L18 146 Z" fill="url(#shieldBorderGrad)" stroke="#1E5280" stroke-width="2" />
+        <!-- Inner Crisp White Shield Frame -->
+        <path d="M35 29 H165 V137 L100 186 L35 137 Z" fill="#FFFFFF" />
+        <!-- Left Crimson Red Panel -->
+        <path d="M47 41 H95 V167 L47 131 Z" fill="#C8102E" />
+        <!-- Right Deep Navy Panel -->
+        <path d="M105 41 H153 V131 L105 167 Z" fill="#0B3558" />
+        <!-- Dynamic Eagle in Flight -->
+        <path fill="url(#arssiEagleGrad)" d="
+          M 122 24
+          L 116 40 L 126 31 L 120 47 L 132 39 L 124 54 L 138 48 L 128 62 L 143 59 L 131 71 L 145 71 L 131 80 L 143 83 L 126 91
+          C 120 98, 113 105, 106 111
+          L 137 146 L 127 143 L 133 153 L 121 146 L 124 156 L 113 147 L 114 157 L 105 146 L 103 154 L 97 142
+          C 94 140, 91 137, 89 134
+          L 81 144 L 74 146 L 78 141 L 72 141 L 79 137 L 85 129
+          L 77 132 L 70 133 L 74 129 L 69 128 L 76 125 L 83 121
+          C 77 115, 74 109, 73 103
+          C 66 102, 60 105, 57 111
+          C 54 105, 55 97, 61 92
+          C 65 89, 70 88, 76 87
+          C 74 74, 69 62, 57 50
+          L 69 52 L 53 42 L 67 45 L 52 34 L 68 38 L 56 28 L 74 34 L 66 25
+          C 79 31, 88 45, 92 67
+          C 101 53, 111 38, 122 24 Z
+        " />
+      </symbol>
+
+      <!-- Master ARSSI Stacked Logo (Wordmark + Shield) -->
+      <symbol id="arssi-full-logo" viewBox="0 0 240 280">
+        <g fill="currentColor">
+          <!-- A -->
+          <path d="M18 48 V26 C18 14 26 8 38 8 H54 V48 H44 V33 H28 V48 Z M28 24 H44 V17 H37 C31 17 28 19 28 24 Z" />
+          <!-- R -->
+          <path d="M64 8 H94 C103 8 108 13 108 21 C108 27 104 32 97 33 L109 48 H97 L86 34 H74 V48 H64 Z M74 17 V26 H92 C96 26 98 24 98 21.5 C98 19 96 17 92 17 Z" />
+          <!-- S -->
+          <path d="M116 40 H144 C147 40 149 38.5 149 36 C149 33.5 147 32 143 32 H128 C119 32 115 27 115 20 C115 12 121 8 131 8 H156 V16 H131 C127 16 125 17.5 125 20 C125 22.5 127 24 131 24 H145 C154 24 159 28.5 159 36 C159 44 153 48 143 48 H116 Z" />
+          <!-- S -->
+          <path d="M166 40 H194 C197 40 199 38.5 199 36 C199 33.5 197 32 193 32 H178 C169 32 165 27 165 20 C165 12 171 8 181 8 H206 V16 H181 C177 16 175 17.5 175 20 C175 22.5 177 24 181 24 H195 C204 24 209 28.5 209 36 C209 44 203 48 193 48 H166 Z" />
+          <!-- I -->
+          <path d="M217 8 H227 V48 H217 Z" />
+        </g>
+        <use href="#arssi-shield-mark" x="20" y="56" width="200" height="220" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- =====================================================================
+       TOP ANNOUNCEMENT / TELEMETRY BAR
+  ====================================================================== -->
+  <div class="bg-arssi-surface/90 border-b border-slate-800/80 text-xs py-2 px-4 sm:px-6 lg:px-8 relative z-40">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center flex-wrap gap-2">
+        <a href="#certifications" class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-arssi-crimson/20 text-red-300 border border-arssi-crimson/40 hover:bg-arssi-crimson/30 transition">
+          <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight animate-ping mr-1.5"></span>
+          OFFSEC CERTIFIED : OSCP &amp; OSWE
+        </a>
+        <a href="#certifications" class="inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold bg-sky-500/15 text-sky-300 border border-sky-500/30 hover:bg-sky-500/25 transition">
+          CLAUDE CVP CERTIFIED DEFENSE
+        </a>
+        <span class="text-slate-300 hidden xl:inline ml-1" data-i18n="topbar.tagline">
+          Pentest • RSSI à Temps Partagé • Architecture Sécurité • DevSecOps Azure &amp; AWS
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-3 ml-auto">
+        <span class="inline-flex items-center text-slate-300 font-mono text-[11px]">
+          <svg class="w-3.5 h-3.5 text-arssi-crimsonLight mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span data-i18n="topbar.location">Grenoble, France (Auvergne-Rhône-Alpes)</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       MAIN STICKY NAVIGATION BAR
+  ====================================================================== -->
+  <header id="navbar" class="sticky top-0 z-50 transition-all duration-300 bg-arssi-dark/85 backdrop-blur-xl border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Brand Logo -->
+        <a href="#" class="flex items-center gap-3.5 group focus:outline-none">
+          <div class="relative flex items-center justify-center w-12 h-12 rounded-xl bg-white/5 border border-slate-700/70 group-hover:border-arssi-crimson/60 transition p-1 shadow-inner">
+            <svg class="w-10 h-11 drop-shadow" aria-label="ARSSI Shield Emblem">
+              <use href="#arssi-shield-mark"></use>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+              <span class="font-display font-bold text-2xl tracking-[0.18em] text-white group-hover:text-sky-100 transition">ARSSI</span>
+              <span class="hidden sm:inline-block w-2 h-2 rounded-full bg-arssi-crimson"></span>
+            </div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-slate-400" data-i18n="nav.subtitle">Offensive Security &amp; Cloud Architecture</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden lg:flex items-center space-x-8 text-sm font-medium text-slate-300">
+          <a href="#services" class="hover:text-white transition py-2" data-i18n="nav.services">Expertises</a>
+          <a href="#certifications" class="hover:text-white transition py-2 flex items-center gap-1.5">
+            <span>Certifications</span>
+            <span class="px-1.5 py-0.5 text-[10px] font-mono bg-arssi-crimson/20 text-red-300 rounded border border-arssi-crimson/40">OSCP • OSWE • CVP</span>
+          </a>
+          <a href="#methodology" class="hover:text-white transition py-2" data-i18n="nav.methodology">Méthodologie</a>
+          <a href="#why-arssi" class="hover:text-white transition py-2" data-i18n="nav.why">Pourquoi ARSSI</a>
+        </nav>
+
+        <!-- Right Controls: Language Switcher & Primary CTA -->
+        <div class="hidden md:flex items-center space-x-4">
+          <!-- Language Toggle (FR / EN) -->
+          <div class="inline-flex items-center bg-slate-900/90 border border-slate-700/80 rounded-lg p-0.5 text-xs font-mono">
+            <button id="langFrBtn" onclick="setLanguage('fr')" class="px-2.5 py-1 rounded-md bg-arssi-navy text-white font-semibold transition">FR</button>
+            <button id="langEnBtn" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition">EN</button>
+          </div>
+
+          <!-- Primary CTA -->
+          <a href="#contact" class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-arssi-crimson to-arssi-crimsonLight hover:from-red-700 hover:to-red-600 shadow-glow-red transition transform active:scale-95">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+            <span data-i18n="nav.cta">Nous Contacter</span>
+          </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <div class="flex items-center gap-2 md:hidden">
+          <button id="mobileLangBtn" onclick="toggleLanguage()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs font-mono text-slate-200">
+            FR/EN
+          </button>
+          <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-700 text-slate-300 hover:text-white focus:outline-none" aria-label="Menu">
+            <svg id="menuIconOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg id="menuIconClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenu" class="hidden md:hidden bg-arssi-surface/95 backdrop-blur-xl border-b border-slate-800 px-4 pt-3 pb-6 space-y-3">
+      <a href="#services" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:bg-arssi-navy/50" data-i18n="nav.services">Expertises</a>
+      <a href="#certifications" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:bg-arssi-navy/50">Certifications (OSCP / OSWE / CVP)</a>
+      <a href="#methodology" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:bg-arssi-navy/50" data-i18n="nav.methodology">Méthodologie</a>
+      <a href="#why-arssi" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-200 hover:bg-arssi-navy/50" data-i18n="nav.why">Pourquoi ARSSI</a>
+      <div class="pt-2">
+        <a href="#contact" onclick="toggleMobileMenu()" class="w-full inline-flex items-center justify-center px-5 py-3 rounded-lg text-sm font-semibold text-white bg-arssi-crimson hover:bg-arssi-crimsonLight shadow-glow-red" data-i18n="nav.cta">
+          Nous Contacter
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================================
+       HERO SECTION WITH INTERACTIVE CYBER MESH CANVAS & ARSSI CONSOLE
+  ====================================================================== -->
+  <section class="relative overflow-hidden pt-10 pb-20 lg:pt-16 lg:pb-28 border-b border-slate-800/80">
+    <!-- Interactive Network Defense Canvas -->
+    <canvas id="cyberCanvas" class="absolute inset-0 w-full h-full pointer-events-none opacity-65"></canvas>
+
+    <!-- Ambient Radial Glows -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-arssi-navy/40 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/3 right-0 w-96 h-96 bg-arssi-crimson/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        
+        <!-- Left Column: Value Proposition & CTAs -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-arssi-navy/40 border border-sky-500/30 text-sky-300 text-xs font-mono">
+            <span class="w-2 h-2 rounded-full bg-arssi-crimsonLight"></span>
+            <span data-i18n="hero.badge">PENTEST • RSSI TEMPS PARTAGÉ • ARCHITECTURE • DEVSECOPS</span>
+          </div>
+
+          <h1 class="font-display font-bold text-4xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-[1.12]">
+            <span data-i18n="hero.title1">Sécurisez vos Infrastructures,</span>
+            <span class="block mt-1 bg-gradient-to-r from-white via-sky-200 to-arssi-crimsonLight bg-clip-text text-transparent" data-i18n="hero.title2">
+              Applications &amp; Clouds Critiques.
+            </span>
+          </h1>
+
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl" data-i18n="hero.subtitle">
+            Basé à Grenoble, ARSSI accompagne les entreprises technologiques et industrielles en sécurité offensive (Pentest &amp; Audit de code certifié Offensive-Security), revue d’architecture Zero-Trust, DevSecOps sur Azure &amp; AWS, et accompagnement RSSI / CISO Assistant à temps partagé.
+          </p>
+
+          <!-- Four Core Service Pills -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 max-w-2xl">
+            <a href="#services" onclick="highlightServiceTab('pentest')" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/75 border border-slate-800 hover:border-arssi-crimson/60 transition group">
+              <span class="w-2 h-8 rounded-full bg-arssi-crimson group-hover:scale-y-110 transition"></span>
+              <div>
+                <div class="text-[11px] font-mono text-slate-400" data-i18n="hero.pill1.sub">01 / OFFENSIVE (OSCP • OSWE)</div>
+                <div class="text-sm font-semibold text-white" data-i18n="hero.pill1">Tests d’Intrusion &amp; Audit de Code</div>
+              </div>
+            </a>
+            <a href="#services" onclick="highlightServiceTab('vciso')" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/75 border border-slate-800 hover:border-sky-500/60 transition group">
+              <span class="w-2 h-8 rounded-full bg-sky-500 group-hover:scale-y-110 transition"></span>
+              <div>
+                <div class="text-[11px] font-mono text-slate-400" data-i18n="hero.pill2.sub">02 / LEADERSHIP OPÉRATIONNEL</div>
+                <div class="text-sm font-semibold text-white" data-i18n="hero.pill2">RSSI / CISO Assistant Temps Partagé</div>
+              </div>
+            </a>
+            <a href="#services" onclick="highlightServiceTab('architecture')" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/75 border border-slate-800 hover:border-emerald-500/60 transition group">
+              <span class="w-2 h-8 rounded-full bg-emerald-500 group-hover:scale-y-110 transition"></span>
+              <div>
+                <div class="text-[11px] font-mono text-slate-400" data-i18n="hero.pill3.sub">03 / DESIGN BY DEFAULT</div>
+                <div class="text-sm font-semibold text-white" data-i18n="hero.pill3">Revue d’Architecture Sécurité</div>
+              </div>
+            </a>
+            <a href="#services" onclick="highlightServiceTab('devsecops')" class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900/75 border border-slate-800 hover:border-amber-500/60 transition group">
+              <span class="w-2 h-8 rounded-full bg-amber-500 group-hover:scale-y-110 transition"></span>
+              <div>
+                <div class="text-[11px] font-mono text-slate-400" data-i18n="hero.pill4.sub">04 / CLOUD AZURE &amp; AWS</div>
+                <div class="text-sm font-semibold text-white" data-i18n="hero.pill4">DevSecOps &amp; Sécurité Cloud</div>
+              </div>
+            </a>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row sm:items-center gap-4 pt-3">
+            <a href="#services" class="inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-sm font-semibold text-slate-200 bg-arssi-navy/40 hover:bg-arssi-navy/70 border border-slate-700 hover:border-slate-500 transition">
+              <span data-i18n="hero.ctaSecondary">Découvrir nos Expertises &amp; Livrables</span>
+            </a>
+          </div>
+
+          <!-- Key Trust Badges -->
+          <div class="pt-6 border-t border-slate-800/90 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs text-slate-400">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-arssi-crimsonLight shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span data-i18n="hero.trust1">Certifié OSCP &amp; OSWE</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              <span data-i18n="hero.trust2">Claude CVP Defense</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+              <span data-i18n="hero.trust3">DevSecOps Azure &amp; AWS</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span data-i18n="hero.trust4">Contre-Audit (Retest) Inclus</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: ARSSI Emblem & Interactive Security Posture Console -->
+        <div class="lg:col-span-5">
+          <div class="glass-panel rounded-2xl p-6 sm:p-7 shadow-glass relative overflow-hidden border border-slate-700/70">
+            <!-- Animated Scanline -->
+            <div class="scanline-bar absolute inset-x-0 top-0 pointer-events-none"></div>
+
+            <!-- Console Top Bar -->
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-800">
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-arssi-crimson"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span class="ml-2 font-mono text-xs text-slate-400">operator@arssi-sec:~#</span>
+              </div>
+              <span class="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                OSCP • OSWE • CVP
+              </span>
+            </div>
+
+            <!-- Centerpiece: Large Crisp Vector ARSSI Logo Showcase -->
+            <div class="flex flex-col items-center justify-center py-4 px-4 rounded-xl bg-gradient-to-b from-slate-900/90 to-arssi-dark/90 border border-slate-800/90 mb-5 relative">
+              <div class="animate-shield">
+                <svg class="w-36 h-44 text-white drop-shadow-[0_10px_25px_rgba(200,16,46,0.28)]" role="img" aria-label="ARSSI Logo">
+                  <use href="#arssi-full-logo"></use>
+                </svg>
+              </div>
+              <div class="mt-2 text-center">
+                <span class="text-[11px] font-mono uppercase tracking-widest text-slate-400" data-i18n="console.motto">
+                  Excellence Offensive • Défense Architecturale &amp; Cloud
+                </span>
+              </div>
+            </div>
+
+            <!-- Interactive Live Assessment Telemetry Tabs -->
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-1">
+                <span data-i18n="console.selectModule">SÉLECTIONNEZ UN PILIER TECHNIQUE :</span>
+                <span class="text-sky-400" data-i18n="console.activeModules">4 MODULES ACTIFS</span>
+              </div>
+
+              <!-- Module 1: Pentest -->
+              <button type="button" onclick="selectConsoleModule('pentest')" id="consoleBtn-pentest" class="w-full text-left p-2.5 rounded-xl bg-arssi-navy/45 border border-arssi-crimson/70 transition flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-arssi-crimsonLight animate-ping"></span>
+                  <div>
+                    <div class="text-xs font-semibold text-white" data-i18n="console.m1.title">01. Pentest &amp; Audit de Code</div>
+                    <div class="text-[11px] font-mono text-slate-400" data-i18n="console.m1.sub">Web • API • Active Directory • White-Box</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-arssi-crimson/20 text-red-300 border border-arssi-crimson/40">OFFSEC</span>
+              </button>
+
+              <!-- Module 2: RSSI Temps Partagé -->
+              <button type="button" onclick="selectConsoleModule('vciso')" id="consoleBtn-vciso" class="w-full text-left p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                  <div>
+                    <div class="text-xs font-semibold text-white" data-i18n="console.m2.title">02. RSSI / CISO Assistant Temps Partagé</div>
+                    <div class="text-[11px] font-mono text-slate-400" data-i18n="console.m2.sub">Pilotage Opérationnel • Vulnérabilités • Projets</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">vCISO</span>
+              </button>
+
+              <!-- Module 3: Architecture Review -->
+              <button type="button" onclick="selectConsoleModule('architecture')" id="consoleBtn-architecture" class="w-full text-left p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <div>
+                    <div class="text-xs font-semibold text-white" data-i18n="console.m3.title">03. Revue d’Architecture Sécurité</div>
+                    <div class="text-[11px] font-mono text-slate-400" data-i18n="console.m3.sub">Zero-Trust • Threat Modeling STRIDE • IAM</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">DESIGN</span>
+              </button>
+
+              <!-- Module 4: DevSecOps Azure & AWS -->
+              <button type="button" onclick="selectConsoleModule('devsecops')" id="consoleBtn-devsecops" class="w-full text-left p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  <div>
+                    <div class="text-xs font-semibold text-white" data-i18n="console.m4.title">04. DevSecOps &amp; Cloud (Azure / AWS)</div>
+                    <div class="text-[11px] font-mono text-slate-400" data-i18n="console.m4.sub">CI/CD • AKS/EKS • Terraform • Claude CVP</div>
+                  </div>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">CLOUD</span>
+              </button>
+
+              <!-- Dynamic Telemetry Output Box -->
+              <div id="consoleOutputBox" class="mt-3 p-3.5 rounded-xl bg-slate-950/90 border border-slate-800 font-mono text-xs space-y-1.5">
+                <div class="flex items-center justify-between text-[11px] text-slate-400">
+                  <span id="consoleOutputHeader">&gt; MODULE: PENTEST_OSCP_OSWE</span>
+                  <span class="text-emerald-400">VERIFIED</span>
+                </div>
+                <p id="consoleOutputText" class="text-slate-200 leading-relaxed text-[11px]">
+                  Exploitation manuelle de failles logiques complexes, audit de code source en boîte blanche , compromission Active Directory et preuves de concept reproductibles.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       OFFENSIVE SECURITY (OSCP & OSWE) + CLAUDE CVP CERTIFIED DEFENSE BANNER
+  ====================================================================== -->
+  <section id="certifications" class="py-16 lg:py-20 bg-arssi-surface/60 border-b border-slate-800/80 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arssi-crimson/15 border border-arssi-crimson/40 text-xs font-mono text-red-300">
+          <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight"></span>
+          <span data-i18n="certs.eyebrow">CERTIFICATIONS TECHNIQUES D’ÉLITE</span>
+        </div>
+        <h2 class="font-display font-bold text-3xl sm:text-4xl text-white" data-i18n="certs.title">
+          L’Alliance de l’Expertise Offensive Security &amp; de la Défense Augmentée
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base" data-i18n="certs.subtitle">
+          Vos audits et architectures sont réalisés directement par un expert s’appuyant sur près de 20 ans d’expérience IT (des PME aux grands groupes internationaux) et cumulant les certifications pratiques de référence mondiale en intrusion, revue de code et ingénierie défensive.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Card 1: OSCP -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 border border-arssi-crimson/40 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-lg bg-arssi-crimson text-white font-mono font-bold text-xs tracking-wider">OSCP // PEN-200</span>
+            <span class="text-xs font-mono text-slate-400">Offensive-Security</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-white mb-2" data-i18n="certs.oscp.title">
+            OffSec Certified Professional (OSCP)
+          </h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4" data-i18n="certs.oscp.desc">
+            Certification pratique de référence en tests d’intrusion réseau et système. Validation par un examen pratique de 24 heures d’exploitation réelle en boîte noire sans outil automatisé.
+          </p>
+          <ul class="space-y-1.5 text-xs font-mono text-slate-300 border-t border-slate-800/80 pt-4">
+            <li class="flex items-center gap-2"><span class="text-arssi-crimsonLight">▸</span> <span data-i18n="certs.oscp.b1">Compromission Active Directory &amp; Mouvements Latéraux</span></li>
+            <li class="flex items-center gap-2"><span class="text-arssi-crimsonLight">▸</span> <span data-i18n="certs.oscp.b2">Élévation de Privilèges Linux &amp; Windows</span></li>
+            <li class="flex items-center gap-2"><span class="text-arssi-crimsonLight">▸</span> <span data-i18n="certs.oscp.b3">Pivoting Réseau, Tunneling &amp; Exploitation sur mesure</span></li>
+          </ul>
+        </div>
+
+        <!-- Card 2: OSWE -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 border border-arssi-crimson/40 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-lg bg-gradient-to-r from-arssi-crimson to-sky-600 text-white font-mono font-bold text-xs tracking-wider">OSWE // WEB-300</span>
+            <span class="text-xs font-mono text-slate-400">Offensive Security</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-white mb-2" data-i18n="certs.oswe.title">
+            OffSec Web Expert (OSWE)
+          </h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4" data-i18n="certs.oswe.desc">
+            Certification avancée dédiée à l’audit d’applications web complexes et à la revue de code source en boîte blanche ( examen de 48h de développement d’exploits multi-étapes).
+          </p>
+          <ul class="space-y-1.5 text-xs font-mono text-slate-300 border-t border-slate-800/80 pt-4">
+            <li class="flex items-center gap-2"><span class="text-sky-400">▸</span> <span data-i18n="certs.oswe.b1">Audit de Code Source (Node.js, Python, Java, C#, PHP, Go)</span></li>
+            <li class="flex items-center gap-2"><span class="text-sky-400">▸</span> <span data-i18n="certs.oswe.b2">Contournement d’Authentification &amp; Failles Logiques Métier</span></li>
+            <li class="flex items-center gap-2"><span class="text-sky-400">▸</span> <span data-i18n="certs.oswe.b3">Chaînage de Vulnérabilités jusqu’à l’Exécution de Code (RCE)</span></li>
+          </ul>
+        </div>
+
+        <!-- Card 3: Claude CVP Certified Defense -->
+        <div class="glass-card rounded-2xl p-6 sm:p-7 border border-sky-500/40 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4">
+            <span class="px-3 py-1 rounded-lg bg-sky-500/20 border border-sky-400/50 text-sky-300 font-mono font-bold text-xs tracking-wider">CLAUDE CVP DEFENSE</span>
+            <span class="text-xs font-mono text-emerald-400">Certified Defense</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-white mb-2" data-i18n="certs.cvp.title">
+            Claude CVP Certified Defense
+          </h3>
+          <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-4" data-i18n="certs.cvp.desc">
+            Maîtrise certifiée de l’ingénierie cyber-défensive assistée par IA : détection approfondie de vulnérabilités à grande échelle, remédiation sécurisée du code et protection des architectures IA/Cloud.
+          </p>
+          <ul class="space-y-1.5 text-xs font-mono text-slate-300 border-t border-slate-800/80 pt-4">
+            <li class="flex items-center gap-2"><span class="text-emerald-400">▸</span> <span data-i18n="certs.cvp.b1">Revue Défensive de Code &amp; Génération de Patchs Vérifiés</span></li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">▸</span> <span data-i18n="certs.cvp.b2">Modélisation de Menaces &amp; Durcissement d’Infrastructures</span></li>
+            <li class="flex items-center gap-2"><span class="text-emerald-400">▸</span> <span data-i18n="certs.cvp.b3">Sécurisation des Systèmes IA / LLM (Prompt Injection, Guardrails)</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       CORE CYBERSECURITY SERVICES (4 TECHNICAL PILLARS)
+  ====================================================================== -->
+  <section id="services" class="py-20 lg:py-28 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16 space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arssi-navy/40 border border-slate-700 text-xs font-mono text-sky-300">
+          <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimson"></span>
+          <span data-i18n="services.eyebrow">NOS 4 DOMAINES D’INTERVENTION</span>
+        </div>
+        <h2 class="font-display font-bold text-3xl sm:text-4xl text-white tracking-tight" data-i18n="services.title">
+          Une Expertise 100% Technique &amp; Opérationnelle
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg" data-i18n="services.subtitle">
+          Du test d’intrusion offensif à l’industrialisation DevSecOps sur Azure et AWS, ARSSI intervient directement au cœur de vos systèmes et aux côtés de vos équipes d’ingénierie.
+        </p>
+      </div>
+
+      <!-- 4 Service Cards Grid (2x2 on Desktop) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- PILLAR 1: PENETRATION TESTING (OSCP & OSWE) -->
+        <div id="service-card-pentest" class="glass-card rounded-2xl p-7 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-arssi-crimson via-red-500 to-arssi-navy"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-arssi-crimson/15 border border-arssi-crimson/40 flex items-center justify-center text-arssi-crimsonLight">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"/>
+                </svg>
+              </div>
+              <span class="font-mono text-xs text-red-300 px-2.5 py-1 rounded-full bg-arssi-crimson/20 border border-arssi-crimson/40" data-i18n="services.p1.tag">PILIER 01 // OSCP &amp; OSWE</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl text-white mb-3" data-i18n="services.p1.title">
+              Tests d’Intrusion (Pentest) &amp; Audit de Code
+            </h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6" data-i18n="services.p1.desc">
+              Évaluez la résistance réelle de vos applications et réseaux face à un attaquant déterminé. Nos tests d’intrusion sont réalisés manuellement en boîte noire, boîte grise ou boîte blanche (avec revue complète du code source).
+            </p>
+
+            <ul class="space-y-3 text-sm text-slate-300 mb-8">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight mt-2 shrink-0"></span>
+                <span data-i18n="services.p1.b1"><strong class="text-white">Pentest Web, API &amp; SaaS :</strong> Exploitation de failles logiques métier, contournement d’authentification/SSO, injections avancées, désérialisation et isolation multi-tenant.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight mt-2 shrink-0"></span>
+                <span data-i18n="services.p1.b2"><strong class="text-white">Audit de Code Source en Boîte Blanche :</strong> Analyse manuelle et assistée (Claude CVP Defense) pour identifier les vulnérabilités zero-day nichées dans votre code applicatif.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight mt-2 shrink-0"></span>
+                <span data-i18n="services.p1.b3"><strong class="text-white">Pentest Interne &amp; Active Directory :</strong> Scénarios « Assumed Breach », Kerberoasting, abus ADCS/GPO, mouvements latéraux et élévation de privilèges.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight mt-2 shrink-0"></span>
+                <span data-i18n="services.p1.b4"><strong class="text-white">Périmètre Externe &amp; Infrastructures :</strong> Audit des surfaces exposées, passerelles VPN, environnements conteneurisés et équipements réseaux.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="font-mono text-xs text-slate-400">OWASP WSTG • PTES • OSCP • OSWE</span>
+          </div>
+        </div>
+
+        <!-- PILLAR 2: CISO / RSSI ASSISTANT À TEMPS PARTAGÉ -->
+        <div id="service-card-vciso" class="glass-card rounded-2xl p-7 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-sky-500 via-arssi-navyLight to-arssi-crimson"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-500/40 flex items-center justify-center text-sky-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <span class="font-mono text-xs text-sky-300 px-2.5 py-1 rounded-full bg-sky-500/15 border border-sky-500/30" data-i18n="services.p2.tag">PILIER 02 // OPÉRATIONNEL</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl text-white mb-3" data-i18n="services.p2.title">
+              RSSI / CISO Assistant à Temps Partagé
+            </h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6" data-i18n="services.p2.desc">
+              Bénéficiez d’un leadership sécurité senior et pragmatique intégré à vos équipes, à rythme flexible (quelques jours par mois), pour structurer votre sécurité opérationnelle ou épauler votre RSSI / DSI en place.
+            </p>
+
+            <ul class="space-y-3 text-sm text-slate-300 mb-8">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p2.b1"><strong class="text-white">Pilotage Opérationnel de la Feuille de Route :</strong> Définition et suivi concret des priorités techniques de sécurisation avec les équipes IT, Dev et Cloud.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p2.b2"><strong class="text-white">Gestion Continue des Vulnérabilités :</strong> Organisation des campagnes de pentest, triage des alertes, suivi du patch management et validation des correctifs.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p2.b3"><strong class="text-white">Security by Design dans les Projets :</strong> Intégration des exigences de sécurité dès la conception des nouvelles fonctionnalités, API et architectures.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-sky-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p2.b4"><strong class="text-white">Support Clients &amp; Due Diligence Technique :</strong> Réponse aux questionnaires de sécurité des clients grands comptes et préparation à la réponse aux incidents.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="font-mono text-xs text-slate-400" data-i18n="services.p2.footer">ACCOMPAGNEMENT FLEXIBLE • SUR SITE / REMOTE</span>
+          </div>
+        </div>
+
+        <!-- PILLAR 3: SECURITY ARCHITECTURE REVIEW -->
+        <div id="service-card-architecture" class="glass-card rounded-2xl p-7 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-arssi-navy"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+              </div>
+              <span class="font-mono text-xs text-emerald-300 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30" data-i18n="services.p3.tag">PILIER 03 // ARCHITECTURE</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl text-white mb-3" data-i18n="services.p3.title">
+              Revue d’Architecture Sécurité &amp; Zero-Trust
+            </h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6" data-i18n="services.p3.desc">
+              Éliminez les failles structurelles dès la phase de conception ou lors de refontes majeures. Nous auditons vos schémas directeurs, flux réseaux et modèles d’authentification pour garantir une défense en profondeur.
+            </p>
+
+            <ul class="space-y-3 text-sm text-slate-300 mb-8">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p3.b1"><strong class="text-white">Architecture Zero-Trust &amp; Segmentation :</strong> Conception de micro-segmentation réseau, cloisonnement IT/OT/Cloud, revue des matrices de flux et pare-feux.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p3.b2"><strong class="text-white">Threat Modeling (STRIDE) :</strong> Modélisation des menaces sur vos architectures logicielles, microservices, API critiques et flux de données sensibles.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p3.b3"><strong class="text-white">Identité, SSO &amp; Moindre Privilège (IAM / PAM) :</strong> Sécurisation des fédérations d’identités (OIDC, SAML, OAuth2), gestion des accès à privilèges et chiffrement KMS/HSM.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p3.b4"><strong class="text-white">Sécurisation des Architectures IA &amp; LLM :</strong> Audit des intégrations RAG/LLM, cloisonnement des données et protection contre les injections de prompts (Claude CVP Defense).</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="font-mono text-xs text-slate-400">NIST 800-207 • STRIDE • ZERO-TRUST</span>
+          </div>
+        </div>
+
+        <!-- PILLAR 4: DEVSECOPS & CLOUD SECURITY (AZURE & AWS) -->
+        <div id="service-card-devsecops" class="glass-card rounded-2xl p-7 sm:p-8 flex flex-col justify-between relative overflow-hidden group">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-amber-500 via-sky-500 to-arssi-navy"></div>
+          
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/>
+                </svg>
+              </div>
+              <span class="font-mono text-xs text-amber-300 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30" data-i18n="services.p4.tag">PILIER 04 // AZURE &amp; AWS</span>
+            </div>
+
+            <h3 class="font-display font-bold text-2xl text-white mb-3" data-i18n="services.p4.title">
+              DevSecOps &amp; Sécurité Cloud (Azure / AWS)
+            </h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6" data-i18n="services.p4.desc">
+              Industrialisez la sécurité au sein de vos cycles de développement et durcissez vos environnements Cloud Microsoft Azure et Amazon Web Services sans ralentir vos mises en production.
+            </p>
+
+            <ul class="space-y-3 text-sm text-slate-300 mb-8">
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p4.b1"><strong class="text-white">Sécurisation des Pipelines CI/CD :</strong> Intégration de contrôles automatisés (SAST, DAST, SCA, détection de secrets, SBOM) sur GitHub Actions, GitLab CI et Azure DevOps.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p4.b2"><strong class="text-white">Sécurité Microsoft Azure :</strong> Audit et durcissement Entra ID (Azure AD), politiques RBAC/PIM, Azure Key Vault, NSG/Private Links et Defender for Cloud.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p4.b3"><strong class="text-white">Sécurité Amazon Web Services (AWS) :</strong> Revue d’architecture multi-comptes AWS Organizations, SCP, rôles IAM moindre privilège, VPC, KMS, GuardDuty et Security Hub.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 shrink-0"></span>
+                <span data-i18n="services.p4.b4"><strong class="text-white">Kubernetes (AKS / EKS) &amp; Infrastructure-as-Code :</strong> Durcissement des clusters conteneurisés, sécurité des images Docker et revue de code Terraform, Bicep et CloudFormation.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+            <span class="font-mono text-xs text-slate-400">AZURE • AWS • AKS/EKS • TERRAFORM</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       4-STEP ENGAGEMENT METHODOLOGY
+  ====================================================================== -->
+  <section id="methodology" class="py-20 bg-arssi-surface/40 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-14 space-y-3">
+        <span class="font-mono text-xs uppercase tracking-widest text-sky-400" data-i18n="method.eyebrow">EXÉCUTION RIGOUREUSE</span>
+        <h2 class="font-display font-bold text-3xl sm:text-4xl text-white" data-i18n="method.title">
+          Notre Méthodologie d’Intervention en 4 Phases
+        </h2>
+        <p class="text-slate-400 text-sm sm:text-base" data-i18n="method.subtitle">
+          Transparence totale, maîtrise des impacts en production et confidentialité absolue du cadrage initial jusqu’au contre-audit de remédiation.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Step 1 -->
+        <div class="glass-card rounded-2xl p-6 relative">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-mono font-bold text-2xl text-arssi-crimsonLight">01</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800" data-i18n="method.s1.tag">NDA &amp; PÉRIMÈTRE</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white mb-2" data-i18n="method.s1.title">Cadrage &amp; Modélisation</h3>
+          <p class="text-slate-400 text-xs leading-relaxed" data-i18n="method.s1.desc">
+            Définition précise du périmètre technique, des règles d’engagement, des environnements cibles et signature systématique d’un accord de confidentialité (NDA).
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="glass-card rounded-2xl p-6 relative">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-mono font-bold text-2xl text-sky-400">02</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800" data-i18n="method.s2.tag">OFFSEC &amp; CLOUD</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white mb-2" data-i18n="method.s2.title">Audit &amp; Exploitation Manuelle</h3>
+          <p class="text-slate-400 text-xs leading-relaxed" data-i18n="method.s2.desc">
+            Tests d’intrusion manuels, revue de code source, analyse d’architecture et audit Cloud Azure/AWS avec alerte immédiate en cas de faille critique.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="glass-card rounded-2xl p-6 relative">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-mono font-bold text-2xl text-amber-400">03</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800" data-i18n="method.s3.tag">LIVRABLES CHIFFRÉS</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white mb-2" data-i18n="method.s3.title">Restitution &amp; Patchs Techniques</h3>
+          <p class="text-slate-400 text-xs leading-relaxed" data-i18n="method.s3.desc">
+            Remise chiffrée du rapport exécutif et technique détaillé, accompagnée d’un atelier de restitution en direct avec vos développeurs, architectes et DevOps.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="glass-card rounded-2xl p-6 relative">
+          <div class="flex items-center justify-between mb-4">
+            <span class="font-mono font-bold text-2xl text-emerald-400">04</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800" data-i18n="method.s4.tag">RETEST INCLUS</span>
+          </div>
+          <h3 class="font-display font-bold text-lg text-white mb-2" data-i18n="method.s4.title">Remédiation &amp; Contre-Audit</h3>
+          <p class="text-slate-400 text-xs leading-relaxed" data-i18n="method.s4.desc">
+            Support direct aux équipes pendant le déploiement des correctifs, suivi d’un contre-audit de vérification (Retest) et d’une attestation officielle d’audit ARSSI.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       WHY ARSSI & GRENOBLE TECH HUB SECTION
+  ====================================================================== -->
+  <section id="why-arssi" class="py-20 lg:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-6 space-y-6">
+          <span class="font-mono text-xs uppercase tracking-widest text-arssi-crimsonLight" data-i18n="why.eyebrow">LA DIFFÉRENCE ARSSI</span>
+          <h2 class="font-display font-bold text-3xl sm:text-4xl text-white leading-tight" data-i18n="why.title">
+            Ancrage Technologique à Grenoble. Indépendance Totale.
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="why.desc">
+            Contrairement aux revendeurs de licences ou aux ESN généralistes, ARSSI est un cabinet pure-player indépendant. Nos audits offensifs, nos revues d’architecture et nos chantiers DevSecOps sont 100% objectifs et orientés résultats techniques.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="font-display font-bold text-white text-base mb-1" data-i18n="why.c1.title">Double Compétence OffSec &amp; Défense</div>
+              <p class="text-xs text-slate-400" data-i18n="why.c1.desc">La combinaison rare des certifications offensives (OSCP, OSWE) et de l’ingénierie défensive (Claude CVP Defense, Cloud Azure/AWS).</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="font-display font-bold text-white text-base mb-1" data-i18n="why.c2.title">Basé à Grenoble (Auvergne-Rhône-Alpes)</div>
+              <p class="text-xs text-slate-400" data-i18n="why.c2.desc">Implanté au cœur de l’écosystème d’innovation grenoblois, avec interventions sur site (Grenoble, Lyon, Paris, Genève) et à distance.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="font-display font-bold text-white text-base mb-1" data-i18n="why.c3.title">Confidentialité &amp; Souveraineté</div>
+              <p class="text-xs text-slate-400" data-i18n="why.c3.desc">Toutes les preuves d’audit et extraits de code sont traités sur des environnements chiffrés dédiés et intégralement purgés après mission.</p>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+              <div class="font-display font-bold text-white text-base mb-1" data-i18n="why.c4.title">Zéro Rapport Scanner Générique</div>
+              <p class="text-xs text-slate-400" data-i18n="why.c4.desc">Chaque constat est vérifié manuellement et accompagné de correctifs concrets adaptés à votre stack applicative et Cloud.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Visual: Brand Identity & High-Assurance Card -->
+        <div class="lg:col-span-6">
+          <div class="glass-panel rounded-2xl p-8 border border-slate-700/80 relative overflow-hidden">
+            <div class="flex flex-col sm:flex-row items-center gap-8">
+              <!-- High-Res Vector Emblem Display -->
+              <div class="shrink-0 p-5 rounded-2xl bg-slate-950/90 border border-slate-800 shadow-glow-blue flex flex-col items-center">
+                <svg class="w-32 h-36 text-white" aria-label="ARSSI Vector Shield">
+                  <use href="#arssi-full-logo"></use>
+                </svg>
+              </div>
+
+              <!-- Key Environments Secured -->
+              <div class="space-y-4">
+                <div class="text-xs font-mono uppercase tracking-wider text-slate-400" data-i18n="why.sectorsTitle">ENVIRONNEMENTS &amp; ÉCOSYSTÈMES SÉCURISÉS</div>
+                <div class="space-y-2.5 text-sm">
+                  <div class="flex items-center gap-2.5 text-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-arssi-crimson"></span>
+                    <span data-i18n="why.s1">Éditeurs SaaS, Plateformes Web, API &amp; Microservices</span>
+                  </div>
+                  <div class="flex items-center gap-2.5 text-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                    <span data-i18n="why.s2">Infrastructures Cloud Microsoft Azure &amp; Amazon Web Services</span>
+                  </div>
+                  <div class="flex items-center gap-2.5 text-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span data-i18n="why.s3">Industrie, DeepTech, MedTech &amp; IoT (Pôle Grenoblois)</span>
+                  </div>
+                  <div class="flex items-center gap-2.5 text-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                    <span data-i18n="why.s4">Systèmes Hybrides Active Directory, Kubernetes &amp; IA/LLM</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       DIRECT EXECUTIVE CONTACT & ENCRYPTED COMMUNICATION SECTION (NO FORM)
+  ====================================================================== -->
+  <section id="contact" class="py-20 lg:py-28 bg-gradient-to-b from-arssi-surface/60 to-arssi-dark border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Column: Direct Contact Channels -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-arssi-crimson/20 border border-arssi-crimson/40 text-xs font-mono text-red-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-arssi-crimsonLight"></span>
+            <span data-i18n="contact.eyebrow">CONTACT DIRECT &amp; CONFIDENTIEL</span>
+          </div>
+
+          <h2 class="font-display font-bold text-3xl sm:text-4xl text-white" data-i18n="contact.title">
+            Planifier un Échange Technique ou Cadrer une Mission
+          </h2>
+          <p class="text-slate-300 text-sm sm:text-base leading-relaxed" data-i18n="contact.desc">
+            Échangez directement avec un consultant senior ARSSI sans intermédiaire commercial. Toutes les prises de contact sont traitées sous stricte confidentialité avec signature d’un NDA mutuel sur simple demande.
+          </p>
+
+          <!-- Primary Direct Email Action -->
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <button type="button" onclick="openDirectEmail()" class="px-6 py-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-arssi-crimson to-arssi-crimsonLight hover:from-red-700 hover:to-red-600 shadow-glow-red transition flex items-center gap-2.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span data-i18n="contact.emailBtn">Nous Contacter par E-mail</span>
+            </button>
+
+            <a href="#services" class="px-5 py-4 rounded-xl text-xs font-mono font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 border border-slate-700 transition">
+              <span data-i18n="contact.simBtn">Revoir nos 4 Piliers Techniques</span>
+            </a>
+          </div>
+
+          <!-- Location & PGP Cards -->
+          <div class="space-y-3 pt-2">
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start gap-3.5">
+              <div class="p-2.5 rounded-lg bg-arssi-navy/60 text-sky-300 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <div>
+                <div class="text-xs font-mono text-slate-400" data-i18n="contact.hqLabel">LOCALISATION &amp; INTERVENTIONS</div>
+                <div class="text-sm font-semibold text-white mt-0.5" data-i18n="contact.hq">Grenoble, France — Auvergne-Rhône-Alpes</div>
+                <div class="text-xs text-slate-400 mt-0.5" data-i18n="contact.hqSub">Interventions sur site (Grenoble, Lyon, Paris, Genève) &amp; à distance</div>
+              </div>
+            </div>
+
+            <!-- PGP Fingerprint Box -->
+            <div class="p-4 rounded-xl bg-slate-950/90 border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                  <span data-i18n="contact.pgpLabel">EMPREINTE CLÉ PUBLIQUE PGP</span>
+                </span>
+                <button type="button" onclick="copyText('4A8F 9C12 E7B0 31D4 88A2  C810 2E0B 3558 AR55 1SEC')" class="text-xs font-mono px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition" data-i18n="contact.pgpCopyBtn">
+                  Copier l’ID PGP
+                </button>
+              </div>
+              <div class="font-mono text-[11px] text-slate-400 break-all select-all bg-slate-900/90 p-2.5 rounded border border-slate-800/80">
+                4A8F 9C12 E7B0 31D4 88A2 &nbsp;C810 2E0B 3558 AR55 1SEC
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: 3-Step Mission Initialization Card -->
+        <div class="lg:col-span-6">
+          <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-700/80 space-y-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div>
+                <span class="text-xs font-mono uppercase text-sky-400" data-i18n="contact.cardEyebrow">INITIALISATION RAPIDE</span>
+                <h3 class="font-display font-bold text-xl text-white mt-0.5" data-i18n="contact.cardTitle">Comment démarre une mission avec ARSSI ?</h3>
+              </div>
+              <span class="px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-mono text-xs" data-i18n="contact.cardBadge">SOUS 24H</span>
+            </div>
+
+            <div class="space-y-4">
+              <div class="p-4 rounded-xl bg-slate-900/75 border border-slate-800 flex items-start gap-4">
+                <span class="font-mono font-bold text-lg text-arssi-crimsonLight">01</span>
+                <div>
+                  <div class="text-sm font-semibold text-white" data-i18n="contact.step1.title">Premier échange technique (30 min) &amp; NDA</div>
+                  <p class="text-xs text-slate-400 mt-1 leading-relaxed" data-i18n="contact.step1.desc">
+                    Signature d’un accord de confidentialité mutuel, compréhension de votre contexte technique (applications, Cloud Azure/AWS, Active Directory ou besoin RSSI à temps partagé).
+                  </p>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-900/75 border border-slate-800 flex items-start gap-4">
+                <span class="font-mono font-bold text-lg text-sky-400">02</span>
+                <div>
+                  <div class="text-sm font-semibold text-white" data-i18n="contact.step2.title">Proposition d’intervention détaillée &amp; transparente</div>
+                  <p class="text-xs text-slate-400 mt-1 leading-relaxed" data-i18n="contact.step2.desc">
+                    Envoi sous 24h à 48h d’une proposition technique.
+                  </p>
+                </div>
+              </div>
+
+              <div class="p-4 rounded-xl bg-slate-900/75 border border-slate-800 flex items-start gap-4">
+                <span class="font-mono font-bold text-lg text-emerald-400">03</span>
+                <div>
+                  <div class="text-sm font-semibold text-white" data-i18n="contact.step3.title">Lancement des opérations &amp; Canal dédié</div>
+                  <p class="text-xs text-slate-400 mt-1 leading-relaxed" data-i18n="contact.step3.desc">
+                    Ouverture d’un canal de communication chiffré direct avec vos équipes techniques, exécution de la mission, restitution et contre-audit inclus.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       FOOTER
+  ====================================================================== -->
+  <footer class="bg-arssi-dark border-t border-slate-800/90 py-12 text-xs text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-8 border-b border-slate-800/80">
+        
+        <!-- Brand & Shield -->
+        <div class="flex items-center gap-3.5">
+          <svg class="w-10 h-11"><use href="#arssi-shield-mark"></use></svg>
+          <div>
+            <div class="font-display font-bold text-lg tracking-[0.18em] text-white">ARSSI</div>
+            <div class="text-slate-400" data-i18n="footer.tagline">Pentest • RSSI à Temps Partagé • Architecture Sécurité • DevSecOps Azure &amp; AWS</div>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="flex flex-wrap gap-6 text-slate-300">
+          <a href="#services" class="hover:text-white transition" data-i18n="footer.link1">Pentest &amp; Code</a>
+          <a href="#services" class="hover:text-white transition" data-i18n="footer.link2">RSSI Temps Partagé</a>
+          <a href="#services" class="hover:text-white transition" data-i18n="footer.link3">Architecture Sécurité</a>
+          <a href="#services" class="hover:text-white transition" data-i18n="footer.link4">DevSecOps Azure / AWS</a>
+          <a href="#certifications" class="hover:text-white transition" data-i18n="footer.link5">Certifications</a>
+        </div>
+      </div>
+
+      <div class="pt-6 text-center">
+        <div>
+          &copy; <span id="currentYear">2026</span> <strong data-i18n="footer.company">ARSSI Cybersécurité</strong> — Grenoble, France.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Custom Non-Intrusive Toast Notification -->
+  <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="px-4 py-3 rounded-xl bg-slate-900/95 border border-arssi-crimson/60 text-white text-xs font-mono shadow-2xl flex items-center gap-2.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span id="toastMessage">Action effectuée</span>
+    </div>
+  </div>
+
+  <!-- =====================================================================
+       APPLICATION JAVASCRIPT (BILINGUAL FR/EN, CONSOLE, DELIVERABLES, CANVAS)
+  ====================================================================== -->
+  <script>
+    let currentLang = 'fr';
+    let currentConsoleModule = 'pentest';
+
+    const I18N = {
+      fr: {
+        'topbar.tagline': 'Pentest • RSSI à Temps Partagé • Architecture Sécurité • DevSecOps Azure & AWS',
+        'topbar.location': 'Grenoble, France (Auvergne-Rhône-Alpes)',
+        'nav.subtitle': 'Offensive Security & Cloud Architecture',
+        'nav.services': 'Expertises',
+        'nav.deliverables': 'Livrables',
+        'nav.methodology': 'Méthodologie',
+        'nav.why': 'Pourquoi ARSSI',
+        'nav.cta': 'Nous Contacter',
+        'hero.badge': 'PENTEST • RSSI TEMPS PARTAGÉ • ARCHITECTURE • DEVSECOPS',
+        'hero.title1': 'Sécurisez vos Infrastructures,',
+        'hero.title2': 'Applications & Clouds Critiques.',
+        'hero.subtitle': 'Basé à Grenoble, ARSSI accompagne les entreprises technologiques et industrielles en sécurité offensive (Pentest & Audit de code certifié Offensive-Security), revue d’architecture Zero-Trust, DevSecOps sur Azure & AWS, et accompagnement RSSI / CISO Assistant à temps partagé.',
+        'hero.pill1.sub': '01 / OFFENSIVE (OSCP • OSWE)',
+        'hero.pill1': 'Tests d’Intrusion & Audit de Code',
+        'hero.pill2.sub': '02 / LEADERSHIP OPÉRATIONNEL',
+        'hero.pill2': 'RSSI / CISO Assistant Temps Partagé',
+        'hero.pill3.sub': '03 / DESIGN BY DEFAULT',
+        'hero.pill3': 'Revue d’Architecture Sécurité',
+        'hero.pill4.sub': '04 / CLOUD AZURE & AWS',
+        'hero.pill4': 'DevSecOps & Sécurité Cloud',
+        'hero.ctaPrimary': 'Planifier un Échange Technique',
+        'hero.ctaSecondary': 'Découvrir nos Expertises & Livrables',
+        'hero.trust1': 'Certifié OSCP & OSWE',
+        'hero.trust2': 'Claude CVP Defense',
+        'hero.trust3': 'DevSecOps Azure & AWS',
+        'hero.trust4': 'Contre-Audit (Retest) Inclus',
+        'console.motto': 'Excellence Offensive • Défense Architecturale & Cloud',
+        'console.selectModule': 'SÉLECTIONNEZ UN PILIER TECHNIQUE :',
+        'console.activeModules': '4 MODULES ACTIFS',
+        'console.m1.title': '01. Pentest & Audit de Code',
+        'console.m1.sub': 'Web • API • Active Directory • White-Box',
+        'console.m2.title': '02. RSSI / CISO Assistant Temps Partagé',
+        'console.m2.sub': 'Pilotage Opérationnel • Vulnérabilités • Projets',
+        'console.m3.title': '03. Revue d’Architecture Sécurité',
+        'console.m3.sub': 'Zero-Trust • Threat Modeling STRIDE • IAM',
+        'console.m4.title': '04. DevSecOps & Cloud (Azure / AWS)',
+        'console.m4.sub': 'CI/CD • AKS/EKS • Terraform • Claude CVP',
+        'certs.eyebrow': 'CERTIFICATIONS TECHNIQUES D’ÉLITE',
+        'certs.title': 'L’Alliance de l’Expertise Offensive Security & de la Défense Augmentée',
+        'certs.subtitle': 'Vos audits et architectures sont réalisés directement par un expert s’appuyant sur près de 20 ans d’expérience IT (des PME aux grands groupes internationaux) et cumulant les certifications pratiques de référence mondiale en intrusion, revue de code et ingénierie défensive.',
+        'certs.oscp.title': 'Offensive-Security Certified Professional (OSCP)',
+        'certs.oscp.desc': 'Certification pratique de référence en tests d’intrusion réseau et système. Validation par un examen pratique de 24 heures d’exploitation réelle en boîte noire sans outil automatisé.',
+        'certs.oscp.b1': 'Compromission Active Directory & Mouvements Latéraux',
+        'certs.oscp.b2': 'Élévation de Privilèges Linux & Windows',
+        'certs.oscp.b3': 'Pivoting Réseau, Tunneling & Exploitation sur mesure',
+        'certs.oswe.title': 'Offensive-Security Web Expert (OSWE)',
+        'certs.oswe.desc': 'Certification avancée dédiée à l’audit d’applications web complexes et à la revue de code source en boîte blanche (examen de 48h de développement d’exploits multi-étapes).',
+        'certs.oswe.b1': 'Audit de Code Source (Node.js, Python, Java, C#, PHP, Go)',
+        'certs.oswe.b2': 'Contournement d’Authentification & Failles Logiques Métier',
+        'certs.oswe.b3': 'Chaînage de Vulnérabilités jusqu’à l’Exécution de Code (RCE)',
+        'certs.cvp.title': 'Claude CVP Certified Defense',
+        'certs.cvp.desc': 'Maîtrise certifiée de l’ingénierie cyber-défensive assistée par IA : détection approfondie de vulnérabilités à grande échelle, remédiation sécurisée du code et protection des architectures IA/Cloud.',
+        'certs.cvp.b1': 'Revue Défensive de Code & Génération de Patchs Vérifiés',
+        'certs.cvp.b2': 'Modélisation de Menaces & Durcissement d’Infrastructures',
+        'certs.cvp.b3': 'Sécurisation des Systèmes IA / LLM (Prompt Injection, Guardrails)',
+        'services.eyebrow': 'NOS 4 DOMAINES D’INTERVENTION',
+        'services.title': 'Une Expertise 100% Technique & Opérationnelle',
+        'services.subtitle': 'Du test d’intrusion offensif à l’industrialisation DevSecOps sur Azure et AWS, ARSSI intervient directement au cœur de vos systèmes et aux côtés de vos équipes d’ingénierie.',
+        'services.p1.tag': 'PILIER 01 // OSCP & OSWE',
+        'services.p1.title': 'Tests d’Intrusion (Pentest) & Audit de Code',
+        'services.p1.desc': 'Évaluez la résistance réelle de vos applications et réseaux face à un attaquant déterminé. Nos tests d’intrusion sont réalisés manuellement en boîte noire, boîte grise ou boîte blanche (avec revue complète du code source).',
+        'services.p1.b1': '<strong class="text-white">Pentest Web, API &amp; SaaS :</strong> Exploitation de failles logiques métier, contournement d’authentification/SSO, injections avancées, désérialisation et isolation multi-tenant.',
+        'services.p1.b2': '<strong class="text-white">Audit de Code Source en Boîte Blanche :</strong> Analyse manuelle et assistée (Claude CVP Defense) pour identifier les vulnérabilités zero-day nichées dans votre code applicatif.',
+        'services.p1.b3': '<strong class="text-white">Pentest Interne &amp; Active Directory :</strong> Scénarios « Assumed Breach », Kerberoasting, abus ADCS/GPO, mouvements latéraux et élévation de privilèges.',
+        'services.p1.b4': '<strong class="text-white">Périmètre Externe &amp; Infrastructures :</strong> Audit des surfaces exposées, passerelles VPN, environnements conteneurisés et équipements réseaux.',
+        'services.p2.tag': 'PILIER 02 // OPÉRATIONNEL',
+        'services.p2.title': 'RSSI / CISO Assistant à Temps Partagé',
+        'services.p2.desc': 'Bénéficiez d’un leadership sécurité senior et pragmatique intégré à vos équipes, à rythme flexible (quelques jours par mois), pour structurer votre sécurité opérationnelle ou épauler votre RSSI / DSI en place.',
+        'services.p2.b1': '<strong class="text-white">Pilotage Opérationnel de la Feuille de Route :</strong> Définition et suivi concret des priorités techniques de sécurisation avec les équipes IT, Dev et Cloud.',
+        'services.p2.b2': '<strong class="text-white">Gestion Continue des Vulnérabilités :</strong> Organisation des campagnes de pentest, triage des alertes, suivi du patch management et validation des correctifs.',
+        'services.p2.b3': '<strong class="text-white">Security by Design dans les Projets :</strong> Intégration des exigences de sécurité dès la conception des nouvelles fonctionnalités, API et architectures.',
+        'services.p2.b4': '<strong class="text-white">Support Clients &amp; Due Diligence Technique :</strong> Réponse aux questionnaires de sécurité des clients grands comptes et préparation à la réponse aux incidents.',
+        'services.p2.footer': 'ACCOMPAGNEMENT FLEXIBLE • SUR SITE / REMOTE',
+        'services.p3.tag': 'PILIER 03 // ARCHITECTURE',
+        'services.p3.title': 'Revue d’Architecture Sécurité & Zero-Trust',
+        'services.p3.desc': 'Éliminez les failles structurelles dès la phase de conception ou lors de refontes majeures. Nous auditons vos schémas directeurs, flux réseaux et modèles d’authentification pour garantir une défense en profondeur.',
+        'services.p3.b1': '<strong class="text-white">Architecture Zero-Trust &amp; Segmentation :</strong> Conception de micro-segmentation réseau, cloisonnement IT/OT/Cloud, revue des matrices de flux et pare-feux.',
+        'services.p3.b2': '<strong class="text-white">Threat Modeling (STRIDE) :</strong> Modélisation des menaces sur vos architectures logicielles, microservices, API critiques et flux de données sensibles.',
+        'services.p3.b3': '<strong class="text-white">Identité, SSO &amp; Moindre Privilège (IAM / PAM) :</strong> Sécurisation des fédérations d’identités (OIDC, SAML, OAuth2), gestion des accès à privilèges et chiffrement KMS/HSM.',
+        'services.p3.b4': '<strong class="text-white">Sécurisation des Architectures IA &amp; LLM :</strong> Audit des intégrations RAG/LLM, cloisonnement des données et protection contre les injections de prompts (Claude CVP Defense).',
+        'services.p4.tag': 'PILIER 04 // AZURE & AWS',
+        'services.p4.title': 'DevSecOps & Sécurité Cloud (Azure / AWS)',
+        'services.p4.desc': 'Industrialisez la sécurité au sein de vos cycles de développement et durcissez vos environnements Cloud Microsoft Azure et Amazon Web Services sans ralentir vos mises en production.',
+        'services.p4.b1': '<strong class="text-white">Sécurisation des Pipelines CI/CD :</strong> Intégration de contrôles automatisés (SAST, DAST, SCA, détection de secrets, SBOM) sur GitHub Actions, GitLab CI et Azure DevOps.',
+        'services.p4.b2': '<strong class="text-white">Sécurité Microsoft Azure :</strong> Audit et durcissement Entra ID (Azure AD), politiques RBAC/PIM, Azure Key Vault, NSG/Private Links et Defender for Cloud.',
+        'services.p4.b3': '<strong class="text-white">Sécurité Amazon Web Services (AWS) :</strong> Revue d’architecture multi-comptes AWS Organizations, SCP, rôles IAM moindre privilège, VPC, KMS, GuardDuty et Security Hub.',
+        'services.p4.b4': '<strong class="text-white">Kubernetes (AKS / EKS) &amp; Infrastructure-as-Code :</strong> Durcissement des clusters conteneurisés, sécurité des images Docker et revue de code Terraform, Bicep et CloudFormation.',
+        'method.eyebrow': 'EXÉCUTION RIGOUREUSE',
+        'method.title': 'Notre Méthodologie d’Intervention en 4 Phases',
+        'method.subtitle': 'Transparence totale, maîtrise des impacts en production et confidentialité absolue du cadrage initial jusqu’au contre-audit de remédiation.',
+        'method.s1.tag': 'NDA & PÉRIMÈTRE',
+        'method.s1.title': 'Cadrage & Modélisation',
+        'method.s1.desc': 'Définition précise du périmètre technique, des règles d’engagement, des environnements cibles et signature systématique d’un accord de confidentialité (NDA).',
+        'method.s2.tag': 'OFFSEC & CLOUD',
+        'method.s2.title': 'Audit & Exploitation Manuelle',
+        'method.s2.desc': 'Tests d’intrusion manuels, revue de code source, analyse d’architecture et audit Cloud Azure/AWS avec alerte immédiate en cas de faille critique.',
+        'method.s3.tag': 'LIVRABLES CHIFFRÉS',
+        'method.s3.title': 'Restitution & Patchs Techniques',
+        'method.s3.desc': 'Remise chiffrée du rapport exécutif et technique détaillé, accompagnée d’un atelier de restitution en direct avec vos développeurs, architectes et DevOps.',
+        'method.s4.tag': 'RETEST INCLUS',
+        'method.s4.title': 'Remédiation & Contre-Audit',
+        'method.s4.desc': 'Support direct aux équipes pendant le déploiement des correctifs, suivi d’un contre-audit de vérification (Retest) et d’une attestation officielle d’audit ARSSI.',
+        'why.eyebrow': 'LA DIFFÉRENCE ARSSI',
+        'why.title': 'Ancrage Technologique à Grenoble. Indépendance Totale.',
+        'why.desc': 'Contrairement aux revendeurs de licences ou aux ESN généralistes, ARSSI est un cabinet pure-player indépendant. Nos audits offensifs, nos revues d’architecture et nos chantiers DevSecOps sont 100% objectifs et orientés résultats techniques.',
+        'why.c1.title': 'Double Compétence OffSec & Défense',
+        'why.c1.desc': 'La combinaison rare des certifications offensives (OSCP, OSWE) et de l’ingénierie défensive (Claude CVP Defense, Cloud Azure/AWS).',
+        'why.c2.title': 'Basé à Grenoble (Auvergne-Rhône-Alpes)',
+        'why.c2.desc': 'Implanté au cœur de l’écosystème d’innovation grenoblois, avec interventions sur site (Grenoble, Lyon, Paris, Genève) et à distance.',
+        'why.c3.title': 'Confidentialité & Souveraineté',
+        'why.c3.desc': 'Toutes les preuves d’audit et extraits de code sont traités sur des environnements chiffrés dédiés et intégralement purgés après mission.',
+        'why.c4.title': 'Zéro Rapport Scanner Générique',
+        'why.c4.desc': 'Chaque constat est vérifié manuellement et accompagné de correctifs concrets adaptés à votre stack applicative et Cloud.',
+        'why.sectorsTitle': 'ENVIRONNEMENTS & ÉCOSYSTÈMES SÉCURISÉS',
+        'why.s1': 'Éditeurs SaaS, Plateformes Web, API & Microservices',
+        'why.s2': 'Infrastructures Cloud Microsoft Azure & Amazon Web Services',
+        'why.s3': 'Industrie, DeepTech, MedTech & IoT (Pôle Grenoblois)',
+        'why.s4': 'Systèmes Hybrides Active Directory, Kubernetes & IA/LLM',
+        'contact.eyebrow': 'CONTACT DIRECT & CONFIDENTIEL',
+        'contact.title': 'Planifier un Échange Technique ou Cadrer une Mission',
+        'contact.desc': 'Échangez directement avec un consultant senior ARSSI sans intermédiaire commercial. Toutes les prises de contact sont traitées sous stricte confidentialité avec signature d’un NDA mutuel sur simple demande.',
+        'contact.emailBtn': 'Nous Contacter par E-mail',
+        'contact.simBtn': 'Revoir nos 4 Piliers Techniques',
+        'contact.hqLabel': 'LOCALISATION & INTERVENTIONS',
+        'contact.hq': 'Grenoble, France — Auvergne-Rhône-Alpes',
+        'contact.hqSub': 'Interventions sur site (Grenoble, Lyon, Paris, Genève) & à distance',
+        'contact.pgpLabel': 'EMPREINTE CLÉ PUBLIQUE PGP',
+        'contact.pgpCopyBtn': 'Copier l’ID PGP',
+        'contact.cardEyebrow': 'INITIALISATION RAPIDE',
+        'contact.cardTitle': 'Comment démarre une mission avec ARSSI ?',
+        'contact.cardBadge': 'SOUS 24H',
+        'contact.step1.title': 'Premier échange technique (30 min) & NDA',
+        'contact.step1.desc': 'Signature d’un accord de confidentialité mutuel, compréhension de votre contexte technique (applications, Cloud Azure/AWS, Active Directory ou besoin RSSI à temps partagé).',
+        'contact.step2.title': 'Proposition d’intervention détaillée & transparente',
+        'contact.step2.desc': 'Envoi sous 24h à 48h d’une proposition technique.',
+        'contact.step3.title': 'Lancement des opérations & Canal dédié',
+        'contact.step3.desc': 'Ouverture d’un canal de communication chiffré direct avec vos équipes techniques, exécution de la mission, restitution et contre-audit inclus.',
+        'footer.tagline': 'Pentest (OSCP / OSWE) • RSSI à Temps Partagé • Architecture Sécurité • DevSecOps Azure & AWS',
+        'footer.link1': 'Pentest & Code',
+        'footer.link2': 'RSSI Temps Partagé',
+        'footer.link3': 'Architecture Sécurité',
+        'footer.link4': 'DevSecOps Azure / AWS',
+        'footer.link5': 'Certifications',
+        'footer.company': 'ARSSI Cybersécurité'
+      },
+      en: {
+        'topbar.tagline': 'Pentest • Part-Time vCISO • Security Architecture • Azure & AWS DevSecOps',
+        'topbar.location': 'Grenoble, France (French Alps Tech Hub)',
+        'nav.subtitle': 'Offensive Security & Cloud Architecture',
+        'nav.services': 'Services',
+        'nav.deliverables': 'Deliverables',
+        'nav.methodology': 'Methodology',
+        'nav.why': 'Why ARSSI',
+        'nav.cta': 'Contact Us',
+        'hero.badge': 'PENTEST • PART-TIME vCISO • ARCHITECTURE • DEVSECOPS',
+        'hero.title1': 'Secure Your Critical Infrastructure,',
+        'hero.title2': 'Applications & Cloud Environments.',
+        'hero.subtitle': 'Based in Grenoble, France, ARSSI partners with tech and industrial companies for offensive security (OSCP / OSWE certified Pentest & White-Box Code Audit), Zero-Trust Architecture Review, DevSecOps on Azure & AWS, and operational Part-Time CISO / vCISO support.',
+        'hero.pill1.sub': '01 / OFFENSIVE (OSCP • OSWE)',
+        'hero.pill1': 'Penetration Testing & Code Audit',
+        'hero.pill2.sub': '02 / OPERATIONAL LEADERSHIP',
+        'hero.pill2': 'Part-Time CISO / RSSI Assistant',
+        'hero.pill3.sub': '03 / DESIGN BY DEFAULT',
+        'hero.pill3': 'Security Architecture Review',
+        'hero.pill4.sub': '04 / AZURE & AWS CLOUD',
+        'hero.pill4': 'DevSecOps & Cloud (Azure / AWS)',
+        'hero.ctaPrimary': 'Schedule a Technical Call',
+        'hero.ctaSecondary': 'Explore Services & Deliverables',
+        'hero.trust1': 'OSCP & OSWE Certified',
+        'hero.trust2': 'Claude CVP Defense',
+        'hero.trust3': 'Azure & AWS DevSecOps',
+        'hero.trust4': 'Free Remediation Retest',
+        'console.motto': 'Offensive Excellence • Architectural & Cloud Defense',
+        'console.selectModule': 'SELECT A TECHNICAL PILLAR:',
+        'console.activeModules': '4 ACTIVE MODULES',
+        'console.m1.title': '01. Pentest & Code Audit',
+        'console.m1.sub': 'Web • API • Active Directory • White-Box',
+        'console.m2.title': '02. Part-Time CISO / RSSI Assistant',
+        'console.m2.sub': 'Operational Leadership • Vulnerabilities • Projects',
+        'console.m3.title': '03. Security Architecture Review',
+        'console.m3.sub': 'Zero-Trust • STRIDE Threat Modeling • IAM',
+        'console.m4.title': '04. DevSecOps & Cloud (Azure / AWS)',
+        'console.m4.sub': 'CI/CD • AKS/EKS • Terraform • Claude CVP',
+        'certs.eyebrow': 'ELITE TECHNICAL CERTIFICATIONS',
+        'certs.title': 'Combining Offensive Security Mastery & Augmented Defense',
+        'certs.subtitle': 'Your assessments and architectures are executed directly by an expert backed by nearly 20 years of IT experience (from small businesses to global enterprises) and holding world-renowned hands-on certifications in exploitation, source code review, and defensive engineering.',
+        'certs.oscp.title': 'OffSec Certified Professional (OSCP)',
+        'certs.oscp.desc': 'The gold-standard hands-on certification for network and system penetration testing, validated through a grueling 24-hour live exploitation exam.',
+        'certs.oscp.b1': 'Active Directory Compromise & Lateral Movement',
+        'certs.oscp.b2': 'Linux & Windows Privilege Escalation',
+        'certs.oscp.b3': 'Network Pivoting, Tunneling & Custom Exploitation',
+        'certs.oswe.title': 'OffSec Web Expert (OSWE)',
+        'certs.oswe.desc': 'Advanced white-box web application security certification focused on deep source code review, authentication bypass, and custom RCE exploit development (48h exam).',
+        'certs.oswe.b1': 'Source Code Audit (Node.js, Python, Java, C#, PHP, Go)',
+        'certs.oswe.b2': 'Authentication Bypass & Business Logic Flaws',
+        'certs.oswe.b3': 'Vulnerability Chaining to Remote Code Execution (RCE)',
+        'certs.cvp.title': 'Claude CVP Certified Defense',
+        'certs.cvp.desc': 'Certified mastery in AI-augmented cyber defense engineering: large-scale vulnerability detection, verified code-level remediation patches, and AI/Cloud architecture hardening.',
+        'certs.cvp.b1': 'Defensive Code Review & Verified Patch Generation',
+        'certs.cvp.b2': 'Threat Modeling & Infrastructure Hardening',
+        'certs.cvp.b3': 'AI / LLM System Security (Prompt Injection, Guardrails)',
+        'services.eyebrow': 'OUR 4 CORE PILLARS',
+        'services.title': '100% Technical & Operational Cybersecurity',
+        'services.subtitle': 'From manual offensive penetration testing to DevSecOps automation on Azure and AWS, ARSSI works hands-on with your systems and engineering teams.',
+        'services.p1.tag': 'PILLAR 01 // OSCP & OSWE',
+        'services.p1.title': 'Penetration Testing (Pentest) & Code Review',
+        'services.p1.desc': 'Test your applications and networks against a determined adversary. We perform deep manual black-box, grey-box, and white-box assessments (including full source code audit).',
+        'services.p1.b1': '<strong class="text-white">Web, API &amp; SaaS Pentest:</strong> Business logic flaw exploitation, authentication/SSO bypass, advanced injections, deserialization, and multi-tenant isolation.',
+        'services.p1.b2': '<strong class="text-white">White-Box Source Code Audit:</strong> Manual and AI-assisted (Claude CVP Defense) analysis to uncover zero-day vulnerabilities hidden in your application code.',
+        'services.p1.b3': '<strong class="text-white">Internal &amp; Active Directory Pentest:</strong> Assumed Breach scenarios, Kerberoasting, ADCS/GPO abuse, lateral movement, and privilege escalation.',
+        'services.p1.b4': '<strong class="text-white">External Perimeter &amp; Infrastructure:</strong> Audit of exposed attack surfaces, VPN gateways, containerized environments, and network appliances.',
+        'services.p2.tag': 'PILLAR 02 // OPERATIONAL',
+        'services.p2.title': 'Part-Time CISO / RSSI Assistant',
+        'services.p2.desc': 'Gain senior, hands-on security leadership embedded within your teams on a flexible schedule (a few days per month) to drive operational security or support your existing CISO/CIO.',
+        'services.p2.b1': '<strong class="text-white">Operational Roadmap Execution:</strong> Definition and hands-on tracking of technical security priorities alongside IT, Dev, and Cloud teams.',
+        'services.p2.b2': '<strong class="text-white">Continuous Vulnerability Management:</strong> Coordinating pentest campaigns, alert triage, patch management tracking, and fix verification.',
+        'services.p2.b3': '<strong class="text-white">Security by Design in Projects:</strong> Embedding security requirements from day one across new features, APIs, and architectures.',
+        'services.p2.b4': '<strong class="text-white">Customer Support &amp; Technical Due Diligence:</strong> Answering enterprise client security questionnaires and preparing incident response readiness.',
+        'services.p2.footer': 'FLEXIBLE ENGAGEMENT • ON-SITE / REMOTE',
+        'services.p3.tag': 'PILLAR 03 // ARCHITECTURE',
+        'services.p3.title': 'Security Architecture Review & Zero-Trust',
+        'services.p3.desc': 'Eliminate structural design flaws before deployment. We audit your network topologies, authentication flows, and software blueprints to enforce defense-in-depth.',
+        'services.p3.b1': '<strong class="text-white">Zero-Trust Architecture &amp; Segmentation:</strong> Network micro-segmentation design, IT/OT/Cloud isolation, traffic matrix and firewall rule reviews.',
+        'services.p3.b2': '<strong class="text-white">Threat Modeling (STRIDE):</strong> Threat modeling across your software architectures, microservices, critical APIs, and sensitive data flows.',
+        'services.p3.b3': '<strong class="text-white">Identity, SSO &amp; Least Privilege (IAM / PAM):</strong> Securing identity federations (OIDC, SAML, OAuth2), privileged access management, and KMS/HSM encryption.',
+        'services.p3.b4': '<strong class="text-white">AI &amp; LLM Architecture Security:</strong> Auditing RAG/LLM integrations, data isolation, and prompt injection guardrails (Claude CVP Defense).',
+        'services.p4.tag': 'PILLAR 04 // AZURE & AWS',
+        'services.p4.title': 'DevSecOps & Cloud Security (Azure / AWS)',
+        'services.p4.desc': 'Embed automated security gates into your CI/CD pipelines and harden your Microsoft Azure and Amazon Web Services cloud environments without slowing down releases.',
+        'services.p4.b1': '<strong class="text-white">CI/CD Pipeline Hardening:</strong> Integrating automated security controls (SAST, DAST, SCA, secret scanning, SBOM) into GitHub Actions, GitLab CI, and Azure DevOps.',
+        'services.p4.b2': '<strong class="text-white">Microsoft Azure Security:</strong> Auditing and hardening Entra ID (Azure AD), RBAC/PIM policies, Azure Key Vault, NSG/Private Links, and Defender for Cloud.',
+        'services.p4.b3': '<strong class="text-white">Amazon Web Services (AWS) Security:</strong> Multi-account AWS Organizations review, SCPs, least-privilege IAM roles, VPC, KMS, GuardDuty, and Security Hub.',
+        'services.p4.b4': '<strong class="text-white">Kubernetes (AKS / EKS) &amp; Infrastructure-as-Code:</strong> Container cluster hardening, Docker image security, and Terraform, Bicep, and CloudFormation code review.',
+        'method.eyebrow': 'STRUCTURED EXECUTION',
+        'method.title': 'Our 4-Phase Engagement Methodology',
+        'method.subtitle': 'Complete transparency, zero production disruption, and strict confidentiality from initial scoping to final verification retest.',
+        'method.s1.tag': 'NDA & SCOPE',
+        'method.s1.title': 'Scoping & Threat Modeling',
+        'method.s1.desc': 'Definition of technical scope, rules of engagement, target environments, and mutual Non-Disclosure Agreement (NDA).',
+        'method.s2.tag': 'OFFSEC & CLOUD',
+        'method.s2.title': 'Manual Audit & Exploitation',
+        'method.s2.desc': 'Hands-on offensive testing, source code review, architecture analysis, and Azure/AWS cloud audits with immediate alert on critical findings.',
+        'method.s3.tag': 'ENCRYPTED DELIVERABLES',
+        'method.s3.title': 'Reporting & Code-Level Patches',
+        'method.s3.desc': 'Encrypted delivery of executive and technical reports, followed by a live interactive workshop with your developers, architects, and DevOps engineers.',
+        'method.s4.tag': 'RETEST INCLUDED',
+        'method.s4.title': 'Remediation & Verification Retest',
+        'method.s4.desc': 'Direct engineering support during patch rollout, followed by a complimentary verification retest and an official ARSSI Audit Certificate.',
+        'why.eyebrow': 'THE ARSSI DIFFERENCE',
+        'why.title': 'Grenoble Tech Hub Roots. 100% Independent.',
+        'why.desc': 'Unlike software resellers or generalist IT integrators, ARSSI is an independent pure-play cybersecurity practice. Our offensive audits, architecture reviews, and DevSecOps implementations are 100% objective.',
+        'why.c1.title': 'Dual OffSec & Defensive Mastery',
+        'why.c1.desc': 'The rare combination of offensive certifications (OSCP, OSWE) and defensive engineering (Claude CVP Defense, Azure/AWS Cloud).',
+        'why.c2.title': 'Based in Grenoble, France',
+        'why.c2.desc': 'Located in the heart of the French Alps innovation hub, operating on-site (Grenoble, Lyon, Paris, Geneva) and remotely.',
+        'why.c3.title': 'Strict Confidentiality',
+        'why.c3.desc': 'All audit evidence and source code snippets are processed on dedicated encrypted environments and securely purged post-engagement.',
+        'why.c4.title': 'Zero Automated Scanner Dumps',
+        'why.c4.desc': 'Every finding is manually verified and paired with pragmatic engineering fixes tailored to your application and Cloud stack.',
+        'why.sectorsTitle': 'SECURED ENVIRONMENTS & ECOSYSTEMS',
+        'why.s1': 'SaaS Vendors, Web Platforms, APIs & Microservices',
+        'why.s2': 'Microsoft Azure & Amazon Web Services Cloud Infrastructure',
+        'why.s3': 'Industry, DeepTech, MedTech & IoT (Grenoble Tech Hub)',
+        'why.s4': 'Hybrid Active Directory, Kubernetes & AI/LLM Systems',
+        'contact.eyebrow': 'DIRECT & CONFIDENTIAL CONTACT',
+        'contact.title': 'Schedule a Technical Call or Scope an Engagement',
+        'contact.desc': 'Speak directly with an ARSSI Senior Consultant with no sales intermediaries. All inquiries are handled under strict confidentiality with a mutual NDA signed upon request.',
+        'contact.emailBtn': 'Contact Us via Email',
+        'contact.simBtn': 'Review Our 4 Technical Pillars',
+        'contact.hqLabel': 'LOCATION & OPERATIONS',
+        'contact.hq': 'Grenoble, France — Auvergne-Rhône-Alpes',
+        'contact.hqSub': 'On-site engagements (Grenoble, Lyon, Paris, Geneva) & Remote',
+        'contact.pgpLabel': 'PGP PUBLIC KEY FINGERPRINT',
+        'contact.pgpCopyBtn': 'Copy PGP ID',
+        'contact.cardEyebrow': 'FAST ONBOARDING',
+        'contact.cardTitle': 'How does an ARSSI engagement start?',
+        'contact.cardBadge': 'WITHIN 24H',
+        'contact.step1.title': 'Initial Technical Call (30 min) & Mutual NDA',
+        'contact.step1.desc': 'Mutual NDA signature and discussion of your technical environment (applications, Azure/AWS Cloud, Active Directory, or Part-Time CISO needs).',
+        'contact.step2.title': 'Clear, Transparent Technical Proposal',
+        'contact.step2.desc': 'Delivery within 24–48h of a detailed technical proposal.',
+        'contact.step3.title': 'Kick-Off & Dedicated Encrypted Channel',
+        'contact.step3.desc': 'Setup of a dedicated encrypted communication channel with your engineering team, execution, restitution workshop, and included retest.',
+        'footer.tagline': 'Pentest (OSCP / OSWE) • Part-Time CISO • Security Architecture • Azure & AWS DevSecOps',
+        'footer.link1': 'Pentest & Code',
+        'footer.link2': 'Part-Time CISO',
+        'footer.link3': 'Security Architecture',
+        'footer.link4': 'Azure / AWS DevSecOps',
+        'footer.link5': 'Certifications',
+        'footer.company': 'ARSSI Cybersecurity'
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+
+      const frBtn = document.getElementById('langFrBtn');
+      const enBtn = document.getElementById('langEnBtn');
+      if (lang === 'fr') {
+        frBtn.className = 'px-2.5 py-1 rounded-md bg-arssi-navy text-white font-semibold transition';
+        enBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition';
+      } else {
+        enBtn.className = 'px-2.5 py-1 rounded-md bg-arssi-navy text-white font-semibold transition';
+        frBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-white transition';
+      }
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (I18N[lang][key]) {
+          if (I18N[lang][key].includes('<')) {
+            el.innerHTML = I18N[lang][key];
+          } else {
+            el.textContent = I18N[lang][key];
+          }
+        }
+      });
+
+      selectConsoleModule(currentConsoleModule);
+      showToast(lang === 'fr' ? 'Langue : Français (FR)' : 'Language: English (EN)');
+    }
+
+    function toggleLanguage() {
+      setLanguage(currentLang === 'fr' ? 'en' : 'fr');
+    }
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const openIcon = document.getElementById('menuIconOpen');
+      const closeIcon = document.getElementById('menuIconClose');
+      menu.classList.toggle('hidden');
+      openIcon.classList.toggle('hidden');
+      closeIcon.classList.toggle('hidden');
+    }
+
+    /**
+     * =====================================================================
+     * HERO CONSOLE TELEMETRY INTERACTION (4 PILLARS)
+     * =====================================================================
+     */
+    const CONSOLE_DATA = {
+      fr: {
+        pentest: {
+          header: '> MODULE: PENTEST_OSCP_OSWE // OFFENSIVE_SECURITY',
+          text: 'Exploitation manuelle de failles logiques complexes, audit de code source en boîte blanche, compromission Active Directory et preuves de concept reproductibles.'
+        },
+        vciso: {
+          header: '> MODULE: PART_TIME_CISO // OPERATIONAL_LEADERSHIP',
+          text: 'Pilotage opérationnel de la sécurité en temps partagé : gestion du backlog de vulnérabilités, cadrage sécurité des projets Dev/Cloud et support technique aux questionnaires clients.'
+        },
+        architecture: {
+          header: '> MODULE: ARCHITECTURE_REVIEW // ZERO_TRUST_STRIDE',
+          text: 'Revue structurelle de vos topologies réseaux, modélisation des menaces STRIDE, fédération d’identités (OIDC/OAuth2) et sécurisation des systèmes IA/LLM (Claude CVP Defense).'
+        },
+        devsecops: {
+          header: '> MODULE: DEVSECOPS_CLOUD // AZURE_AND_AWS',
+          text: 'Sécurisation des pipelines CI/CD (GitHub Actions, GitLab CI, Azure DevOps), durcissement Cloud Microsoft Azure & AWS, clusters Kubernetes (AKS/EKS) et Infrastructure-as-Code (Terraform).'
+        }
+      },
+      en: {
+        pentest: {
+          header: '> MODULE: PENTEST_OSCP_OSWE // OFFENSIVE_SECURITY',
+          text: 'Manual exploitation of complex business logic flaws, white-box source code auditing, Active Directory compromise, and reproducible proof-of-concept exploits.'
+        },
+        vciso: {
+          header: '> MODULE: PART_TIME_CISO // OPERATIONAL_LEADERSHIP',
+          text: 'Operational part-time security leadership: vulnerability backlog management, Dev/Cloud project security scoping, and technical support for client security questionnaires.'
+        },
+        architecture: {
+          header: '> MODULE: ARCHITECTURE_REVIEW // ZERO_TRUST_STRIDE',
+          text: 'Structural review of network topologies, STRIDE threat modeling, identity federation (OIDC/OAuth2), and AI/LLM system hardening (Claude CVP Defense).'
+        },
+        devsecops: {
+          header: '> MODULE: DEVSECOPS_CLOUD // AZURE_AND_AWS',
+          text: 'CI/CD pipeline security (GitHub Actions, GitLab CI, Azure DevOps), Microsoft Azure & AWS cloud hardening, Kubernetes clusters (AKS/EKS), and Infrastructure-as-Code (Terraform).'
+        }
+      }
+    };
+
+    function selectConsoleModule(mod) {
+      currentConsoleModule = mod;
+      ['pentest', 'vciso', 'architecture', 'devsecops'].forEach(key => {
+        const btn = document.getElementById(`consoleBtn-${key}`);
+        if (key === mod) {
+          btn.className = 'w-full text-left p-2.5 rounded-xl bg-arssi-navy/45 border border-arssi-crimson/70 transition flex items-center justify-between';
+        } else {
+          btn.className = 'w-full text-left p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition flex items-center justify-between';
+        }
+      });
+
+      const langData = CONSOLE_DATA[currentLang] || CONSOLE_DATA.fr;
+      document.getElementById('consoleOutputHeader').textContent = langData[mod].header;
+      document.getElementById('consoleOutputText').textContent = langData[mod].text;
+    }
+
+    function highlightServiceTab(pillar) {
+      selectConsoleModule(pillar);
+    }
+
+    /**
+     * =====================================================================
+     * DIRECT EMAIL & CLIPBOARD HELPERS
+     * =====================================================================
+     */
+    function getContactAddress() {
+      return ['contact', 'arssi.fr'].join('@');
+    }
+
+    function openDirectEmail() {
+      const subject = currentLang === 'fr'
+        ? '[ARSSI] Demande d’échange technique / Cadrage de mission'
+        : '[ARSSI] Technical Inquiry / Engagement Scoping';
+      const body = currentLang === 'fr'
+        ? 'Bonjour,\n\nNous souhaiterions échanger avec ARSSI concernant une mission :\n- Besoin principal (Pentest, RSSI à temps partagé, Revue d’Architecture, DevSecOps Azure/AWS) :\n- Contexte technique :\n- Période souhaitée :\n\nCordialement,'
+        : 'Hello,\n\nWe would like to schedule a technical call with ARSSI regarding:\n- Primary need (Pentest, Part-Time CISO, Architecture Review, Azure/AWS DevSecOps):\n- Technical environment:\n- Target timeline:\n\nBest regards,';
+      window.location.href = `mailto:${getContactAddress()}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+
+    function copyText(text, successMsg) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        const defaultMsg = currentLang === 'fr'
+          ? 'Empreinte PGP copiée dans le presse-papiers'
+          : 'PGP fingerprint copied to clipboard';
+        showToast(successMsg || defaultMsg);
+      } catch (err) {
+        showToast(currentLang === 'fr' ? 'Impossible de copier automatiquement' : 'Unable to copy automatically');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      const label = document.getElementById('toastMessage');
+      label.textContent = msg;
+      toast.classList.remove('translate-y-24', 'opacity-0');
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-24', 'opacity-0');
+      }, 3400);
+    }
+
+    /**
+     * =====================================================================
+     * INTERACTIVE CYBER DEFENSE TOPOLOGY CANVAS (HERO BACKGROUND)
+     * =====================================================================
+     */
+    function initCyberCanvas() {
+      const canvas = document.getElementById('cyberCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = 0;
+      let height = 0;
+      let nodes = [];
+      const mouse = { x: -1000, y: -1000 };
+
+      function resize() {
+        const parent = canvas.parentElement;
+        width = canvas.width = parent.clientWidth;
+        height = canvas.height = parent.clientHeight;
+        const count = Math.min(48, Math.max(20, Math.floor((width * height) / 26000)));
+        nodes = [];
+        for (let i = 0; i < count; i++) {
+          nodes.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.45,
+            vy: (Math.random() - 0.5) * 0.45,
+            r: Math.random() * 1.8 + 1.2,
+            isCrimson: i % 6 === 0
+          });
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      });
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          n.x += n.vx;
+          n.y += n.vy;
+
+          if (n.x < 0 || n.x > width) n.vx *= -1;
+          if (n.y < 0 || n.y > height) n.vy *= -1;
+
+          for (let j = i + 1; j < nodes.length; j++) {
+            const m = nodes[j];
+            const dx = n.x - m.x;
+            const dy = n.y - m.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 145) {
+              const alpha = (1 - dist / 145) * 0.22;
+              ctx.strokeStyle = n.isCrimson || m.isCrimson
+                ? `rgba(200, 16, 46, ${alpha})`
+                : `rgba(56, 189, 248, ${alpha})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(n.x, n.y);
+              ctx.lineTo(m.x, m.y);
+              ctx.stroke();
+            }
+          }
+
+          const mdx = n.x - mouse.x;
+          const mdy = n.y - mouse.y;
+          const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+          if (mdist < 170) {
+            ctx.strokeStyle = `rgba(200, 16, 46, ${(1 - mdist / 170) * 0.35})`;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(mouse.x, mouse.y);
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = n.isCrimson ? '#C8102E' : '#38BDF8';
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      draw();
+    }
+
+    window.onload = function () {
+      document.getElementById('currentYear').textContent = new Date().getFullYear();
+      initCyberCanvas();
+    };
+  </script>
+</body>
+</html>
